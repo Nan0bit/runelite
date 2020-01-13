@@ -71,13 +71,15 @@ import net.runelite.client.events.ConfigChanged;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
+import net.runelite.client.plugins.PluginType;
 import net.runelite.client.plugins.banktags.tabs.BankSearch;
 import net.runelite.client.util.QuantityFormatter;
 
 @PluginDescriptor(
 	name = "Bank",
 	description = "Modifications to the banking interface",
-	tags = {"grand", "exchange", "high", "alchemy", "prices", "deposit"}
+	tags = {"grand", "exchange", "high", "alchemy", "prices", "deposit"},
+	type = PluginType.UTILITY
 )
 @Singleton
 public class BankPlugin extends Plugin
@@ -199,8 +201,8 @@ public class BankPlugin extends Plugin
 			if ((entry.getOption().equals(DEPOSIT_WORN) && this.rightClickBankEquip)
 				|| (entry.getOption().equals(DEPOSIT_INVENTORY) && this.rightClickBankInventory)
 				|| (entry.getOption().equals(DEPOSIT_LOOT) && this.rightClickBankLoot)
-				|| (entry.getOption().startsWith(DISABLE) && this.rightClickSetPlaceholders)
-				|| (entry.getOption().startsWith(ENABLE) && this.rightClickSetPlaceholders)
+				|| (entry.getOption().equals(DISABLE) && this.rightClickSetPlaceholders)
+				|| (entry.getOption().equals(ENABLE) && this.rightClickSetPlaceholders)
 				|| (entry.getOption().equals(RELEASE_ALL_PLACEHOLDERS) && this.rightClickReleasePlaceholders)
 				|| (entry.getOption().equals(SEARCH) && this.rightClickSearch)
 				|| (entry.getOption().equals(FILL) && this.rightClickFillBankFiller))
