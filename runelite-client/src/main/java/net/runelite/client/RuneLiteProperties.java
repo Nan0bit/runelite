@@ -42,9 +42,11 @@ public class RuneLiteProperties
 	private static final String WIKI_LINK = "runelite.wiki.link";
 	private static final String PATREON_LINK = "runelite.patreon.link";
 	private static final String LAUNCHER_VERSION_PROPERTY = "launcher.version";
+	private static final String PLUGIN_PATH = "plugin.path";
 	private static final String TROUBLESHOOTING_LINK = "runelite.wiki.troubleshooting.link";
 	private static final String BUILDING_LINK = "runelite.wiki.building.link";
 	private static final String DNS_CHANGE_LINK = "runelite.dnschange.link";
+	private static final String IMGUR_CLIENT_ID = "runelite.imgur.client.id";
 
 	private static final Properties properties = new Properties();
 
@@ -134,7 +136,18 @@ public class RuneLiteProperties
 	@Nullable
 	public static String getLauncherVersion()
 	{
-		String launcherVersion = properties.getProperty(LAUNCHER_VERSION_PROPERTY);
-		return launcherVersion.equals("-1") ? null : launcherVersion;
+		return System.getProperty(LAUNCHER_VERSION_PROPERTY);
+	}
+
+	@Nullable
+	public static String getPluginPath()
+	{
+		String pluginPath = properties.getProperty(PLUGIN_PATH);
+		return pluginPath.equals("") ? null : pluginPath;
+	}
+
+	public static String getImgurClientId()
+	{
+		return properties.getProperty(IMGUR_CLIENT_ID);
 	}
 }

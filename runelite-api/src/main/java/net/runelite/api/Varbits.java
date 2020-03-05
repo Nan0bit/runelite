@@ -308,6 +308,17 @@ public enum Varbits
 	RAID_PARTY_SIZE(5424),
 
 	/**
+	 * Making Friends with My Arm fire pits
+	 *
+	 * Expected values:
+	 *  0 = Not built
+	 *  1 = Built
+	 */
+	FIRE_PIT_GIANT_MOLE(6532),
+	FIRE_PIT_LUMBRIDGE_SWAMP(6533),
+	FIRE_PIT_MOS_LE_HARMLESS(6544),
+
+	/**
 	 * Theatre of Blood 1=In Party, 2=Inside/Spectator, 3=Dead Spectating
 	 */
 	THEATRE_OF_BLOOD(6440),
@@ -490,6 +501,7 @@ public enum Varbits
 	SUPERIOR_ENABLED(5362),
 	FOSSIL_ISLAND_WYVERN_DISABLE(6251),
 
+	BANK_REARRANGE_MODE(3959),
 	CURRENT_BANK_TAB(4150),
 
 	WORLDHOPPER_FAVROITE_1(4597),
@@ -704,15 +716,6 @@ public enum Varbits
 	WITHDRAW_X_AMOUNT(3960),
 
 	IN_PVP_AREA(8121),
-
-	/**
-	 * Twisted league
-	 */
-	TWISTED_LEAGUE_RELIC_1(10049),
-	TWISTED_LEAGUE_RELIC_2(10050),
-	TWISTED_LEAGUE_RELIC_3(10051),
-	TWISTED_LEAGUE_RELIC_4(10052),
-	TWISTED_LEAGUE_RELIC_5(10053),
 
 	/**
 	 * Value of hotkey varbits can be 0-13

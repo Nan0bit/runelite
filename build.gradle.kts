@@ -59,20 +59,43 @@ fun isNonStable(version: String): Boolean {
 allprojects {
     group = "com.openosrs"
     version = ProjectVersions.rlVersion
+    apply<MavenPublishPlugin>()
 }
 
 subprojects {
     repositories {
-        //mavenLocal()
+        if (System.getenv("JITPACK") != null)
+            mavenLocal()
         jcenter()
         maven(url = "https://mvnrepository.com/artifact")
-        maven(url = "https://repo.runelite.net")
-        maven(url = "https://raw.githubusercontent.com/open-osrs/hosting/master")
         maven(url = "https://jitpack.io")
+
+        exclusiveContent {
+            forRepository {
+                maven {
+                    url = uri("https://repo.runelite.net")
+                }
+            }
+            filter {
+                includeGroup("net.runelite.rs")
+                includeModule("net.runelite", "discord")
+                includeModule("net.runelite", "orange-extensions")
+            }
+        }
+        exclusiveContent {
+            forRepository {
+                maven {
+                    url = uri("https://raw.githubusercontent.com/open-osrs/hosting/master")
+                }
+            }
+            filter {
+                includeModule("net.runelite", "fernflower")
+            }
+        }
     }
 
     apply<JavaLibraryPlugin>()
-    apply<MavenPublishPlugin>()
+    //apply<MavenPublishPlugin>()
     apply(plugin = Plugins.testLogger.first)
 
     project.extra["gitCommit"] = localGitCommit
@@ -92,21 +115,15 @@ subprojects {
     configure<PublishingExtension> {
         repositories {
             maven {
-                name = "runelite"
-                url = uri("https://maven.pkg.github.com/open-osrs/runelite")
-                credentials {
-                    username = System.getProperty("gpr_user")
-                    password = System.getProperty("gpr_key")
-                }
+                url = uri("$buildDir/repo")
             }
         }
         publications {
-            register("gpr", MavenPublication::class) {
+            register("mavenJava", MavenPublication::class) {
                 from(components["java"])
             }
         }
     }
-
 
     tasks {
         java {

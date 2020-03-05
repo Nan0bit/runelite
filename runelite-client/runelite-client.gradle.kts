@@ -24,8 +24,8 @@
  */
 
 import org.apache.tools.ant.filters.ReplaceTokens
-import java.util.Date
 import java.text.SimpleDateFormat
+import java.util.Date
 
 plugins {
     id(Plugins.shadow.first) version Plugins.shadow.second
@@ -39,6 +39,7 @@ description = "RuneLite Client"
 
 dependencies {
     annotationProcessor(Libraries.lombok)
+    annotationProcessor(Libraries.pf4j)
 
     compileOnly(Libraries.javax)
     compileOnly(Libraries.lombok)
@@ -58,7 +59,6 @@ dependencies {
     implementation(Libraries.substance)
     implementation(Libraries.jopt)
     implementation(Libraries.apacheCommonsText)
-    implementation(Libraries.plexus)
     implementation(Libraries.annotations)
     implementation(Libraries.jogampGluegen)
     implementation(Libraries.jogampJogl)
@@ -66,9 +66,14 @@ dependencies {
     implementation(Libraries.jooqCodegen)
     implementation(Libraries.jooqMeta)
     implementation(Libraries.sentry)
+    implementation(Libraries.semver)
     implementation(Libraries.slf4jApi)
+    implementation(Libraries.pf4j) {
+        exclude(group = "org.slf4j")
+    }
+    implementation(Libraries.pf4jUpdate)
     implementation(project(":http-api"))
-    implementation(project(":runelite-api"))
+    api(project(":runelite-api"))
     implementation(Libraries.naturalMouse)
 
     runtimeOnly(Libraries.trident)
@@ -101,11 +106,11 @@ fun formatDate(date: Date?) = with(date ?: Date()) {
     SimpleDateFormat("MM-dd-yyyy").format(this)
 }
 
-fun launcherVersion(): String {
-    if (project.hasProperty("releaseBuild")) {
-        return ProjectVersions.launcherVersion
+fun pluginPath(): String {
+    if (project.hasProperty("pluginPath")) {
+        return project.property("pluginPath").toString()
     }
-    return "-1"
+    return ""
 }
 
 tasks {
@@ -123,7 +128,7 @@ tasks {
                 "rs.version" to ProjectVersions.rsversion.toString(),
                 "open.osrs.version" to ProjectVersions.openosrsVersion,
                 "open.osrs.builddate" to formatDate(Date()),
-                "launcher.version" to launcherVersion()
+                "plugin.path" to pluginPath()
         )
 
         inputs.properties(tokens)
@@ -150,7 +155,6 @@ tasks {
     withType<BootstrapTask> {
         group = "openosrs"
     }
-
 
     register<JavaExec>("RuneLite.main()") {
         group = "openosrs"
