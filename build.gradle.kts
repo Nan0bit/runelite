@@ -67,8 +67,8 @@ subprojects {
         if (System.getenv("JITPACK") != null)
             mavenLocal()
         jcenter()
-        maven(url = "https://mvnrepository.com/artifact")
         maven(url = "https://jitpack.io")
+        maven(url = "https://mvnrepository.com/artifact")
 
         exclusiveContent {
             forRepository {
