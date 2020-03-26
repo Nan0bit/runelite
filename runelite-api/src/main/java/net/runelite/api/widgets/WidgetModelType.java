@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017, Adam <Adam@sigterm.info>
+ * Copyright (c) 2020, Jordan <nightfirecat@protonmail.com>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -22,55 +22,14 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package net.runelite.client.ui.overlay;
+package net.runelite.api.widgets;
 
-import java.awt.Dimension;
-import java.awt.Point;
-import java.awt.Rectangle;
-import java.util.ArrayList;
-import java.util.List;
-import javax.annotation.Nullable;
-import lombok.Getter;
-import lombok.Setter;
-import net.runelite.client.plugins.Plugin;
-import net.runelite.client.ui.overlay.components.LayoutableRenderableEntity;
-
-@Getter
-@Setter
-public abstract class Overlay implements LayoutableRenderableEntity
+public class WidgetModelType
 {
-	@Nullable
-	private final Plugin plugin;
-	private Point preferredLocation;
-	private Dimension preferredSize;
-	private OverlayPosition preferredPosition;
-	private Rectangle bounds = new Rectangle();
-	private OverlayPosition position = OverlayPosition.TOP_LEFT;
-	private OverlayPriority priority = OverlayPriority.NONE;
-	private OverlayLayer layer = OverlayLayer.UNDER_WIDGETS;
-	private final List<OverlayMenuEntry> menuEntries = new ArrayList<>();
-
-	protected Overlay()
-	{
-		plugin = null;
-	}
-
-	protected Overlay(@Nullable Plugin plugin)
-	{
-		this.plugin = plugin;
-	}
-
-	/**
-	 * Overlay name, used for saving the overlay, needs to be unique
-	 *
-	 * @return overlay name
-	 */
-	public String getName()
-	{
-		return this.getClass().getSimpleName();
-	}
-	
-	public void onMouseOver()
-	{
-	}
+	public static final int NULL = 0;
+	public static final int MODEL = 1;
+	public static final int NPC_CHATHEAD = 2;
+	public static final int LOCAL_PLAYER_CHATHEAD = 3;
+	public static final int ITEM = 4;
+	public static final int PLAYER = 5;
 }

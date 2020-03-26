@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2017, Adam <Adam@sigterm.info>
+ * Copyright (c) 2020, melky <https://github.com/melkypie>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -22,55 +22,53 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package net.runelite.client.ui.overlay;
+package net.runelite.http.api.worlds;
 
-import java.awt.Dimension;
-import java.awt.Point;
-import java.awt.Rectangle;
-import java.util.ArrayList;
-import java.util.List;
-import javax.annotation.Nullable;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.Setter;
-import net.runelite.client.plugins.Plugin;
-import net.runelite.client.ui.overlay.components.LayoutableRenderableEntity;
 
+/**
+ * Holds the data for each world's region (location)
+ */
+@AllArgsConstructor
 @Getter
-@Setter
-public abstract class Overlay implements LayoutableRenderableEntity
+public enum WorldRegion
 {
-	@Nullable
-	private final Plugin plugin;
-	private Point preferredLocation;
-	private Dimension preferredSize;
-	private OverlayPosition preferredPosition;
-	private Rectangle bounds = new Rectangle();
-	private OverlayPosition position = OverlayPosition.TOP_LEFT;
-	private OverlayPriority priority = OverlayPriority.NONE;
-	private OverlayLayer layer = OverlayLayer.UNDER_WIDGETS;
-	private final List<OverlayMenuEntry> menuEntries = new ArrayList<>();
-
-	protected Overlay()
-	{
-		plugin = null;
-	}
-
-	protected Overlay(@Nullable Plugin plugin)
-	{
-		this.plugin = plugin;
-	}
+	UNITED_STATES_OF_AMERICA("US", "USA"),
+	UNITED_KINGDOM("GB", "GBR"),
+	AUSTRALIA("AU", "AUS"),
+	GERMANY("DE", "DEU");
 
 	/**
-	 * Overlay name, used for saving the overlay, needs to be unique
-	 *
-	 * @return overlay name
+	 * ISO-3166-1 alpha-2 country code
 	 */
-	public String getName()
+	private final String alpha2;
+	/**
+	 * ISO-3166-1 alpha-3 country code
+	 */
+	private final String alpha3;
+
+	/**
+	 * Gets the region using the location id
+	 * {@link WorldRegion} value.
+	 *
+	 * @param locationId the location id of world
+	 * @return WorldRegion the region of the world
+	 */
+	public static WorldRegion valueOf(int locationId)
 	{
-		return this.getClass().getSimpleName();
-	}
-	
-	public void onMouseOver()
-	{
+		switch (locationId)
+		{
+			case 0:
+				return UNITED_STATES_OF_AMERICA;
+			case 1:
+				return UNITED_KINGDOM;
+			case 3:
+				return AUSTRALIA;
+			case 7:
+				return GERMANY;
+			default:
+				return null;
+		}
 	}
 }

@@ -229,7 +229,14 @@ public enum Varbits
 	HB_TRAIL_31372(5750),
 
 	HB_FINISH(5766),
-	HB_STARTED(5767), //not working
+
+	/**
+	 * Started hunting Herbiboar.
+	 * <br>
+	 * NOTE: This value remains at 0 even after starting a Herbiboar trail up until searching the first object along the
+	 * hunting path.
+	 */
+	HB_STARTED(5767),
 
 	/**
 	 * Barbarian Assault
@@ -561,6 +568,12 @@ public enum Varbits
 	 * 3 = arrceus
 	 **/
 	SPELLBOOK(4070),
+
+	/**
+	 * Bank settings/flags
+	 **/
+	BANK_NOTE_FLAG(3958),
+
 
 	/**
 	 * Amount of items in each bank tab
