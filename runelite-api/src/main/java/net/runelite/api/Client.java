@@ -1101,6 +1101,24 @@ public interface Client extends GameShell
 	long getMouseLastPressedMillis();
 
 	/**
+	 * Sets the time at which the last mouse press occurred in milliseconds since
+	 * the UNIX epoch.
+	 */
+	void setMouseLastPressedMillis(long time);
+
+	/**
+	 * Gets the time at which the second-to-last mouse press occurred in milliseconds since
+	 * the UNIX epoch.
+	 */
+	long getClientMouseLastPressedMillis();
+
+	/**
+	 * Sets the time at which the second-to-last mouse press occurred in milliseconds since
+	 * the UNIX epoch.
+	 */
+	void setClientMouseLastPressedMillis(long time);
+
+	/**
 	 * Gets the amount of client ticks since the last keyboard press occurred.
 	 *
 	 * @return amount of idle keyboard ticks
@@ -1853,17 +1871,7 @@ public interface Client extends GameShell
 
 	void setRenderSelf(boolean enabled);
 
-	/**
-	 * @param param0       This is SceneX for gameObject, index for items, and 0 for npc.
-	 * @param param1       This is SceneY for gameObject, static for items, and 0 for npc.
-	 * @param opcode       Menu entry Action opcode.
-	 * @param id           Targets ID
-	 * @param menuEntry    Do these actually matter?
-	 * @param targetString Do these actually matter?
-	 * @param canvasX      Canvas X Point
-	 * @param canvasY      Canvas Y Point
-	 */
-	void invokeMenuAction(int param0, int param1, int opcode, int id, String menuEntry, String targetString, int canvasX, int canvasY);
+	void invokeMenuAction(String option, String target, int identifier, int opcode, int param0, int param1);
 
 	MouseRecorder getMouseRecorder();
 
