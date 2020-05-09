@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Owain van Brakel <https://github.com/Owain94>
+ * Copyright (c) 2019-2020 Owain van Brakel <https://github.com/Owain94>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,9 +33,9 @@ buildscript {
         maven(url = "https://raw.githubusercontent.com/open-osrs/hosting/master")
     }
     dependencies {
-        classpath("org.ajoberstar.grgit:grgit-core:4.0.1")
+        classpath("org.ajoberstar.grgit:grgit-core:4.0.2")
         classpath("com.github.ben-manes:gradle-versions-plugin:0.28.0")
-        classpath("com.openosrs:injector-plugin:${ProjectVersions.openosrsInjectorVersion}")
+        classpath("com.openosrs:injector-plugin:1.1.2")
     }
 }
 
@@ -43,7 +43,7 @@ plugins {
     id("com.adarshr.test-logger") version "2.0.0" apply false
     id("com.github.ben-manes.versions") version "0.28.0"
     id("se.patrikerdes.use-latest-versions") version "0.2.13"
-    id("org.ajoberstar.grgit") version "4.0.1"
+    id("org.ajoberstar.grgit") version "4.0.2"
     id("com.simonharrer.modernizer") version "1.8.0-1" apply false
 
     application
@@ -66,11 +66,28 @@ allprojects {
 
 subprojects {
     repositories {
-        if (System.getenv("JITPACK") != null)
+        if (System.getenv("JITPACK") != null) {
             mavenLocal()
-        jcenter()
-        maven(url = "https://jitpack.io")
-        maven(url = "https://mvnrepository.com/artifact")
+        }
+
+        jcenter {
+            content {
+                excludeGroupByRegex("com\\.openosrs.*")
+                excludeGroupByRegex("com\\.runelite.*")
+            }
+        }
+
+        exclusiveContent {
+            forRepository {
+                maven {
+                    url = uri("https://jitpack.io")
+                }
+            }
+            filter {
+                includeGroup("com.github.petitparser.java-petitparser")
+                includeModule("com.github.petitparser", "java-petitparser")
+            }
+        }
 
         exclusiveContent {
             forRepository {
@@ -95,6 +112,8 @@ subprojects {
                 includeModule("com.openosrs.rxrelay3", "rxrelay")
             }
         }
+
+        maven(url = "https://mvnrepository.com/artifact")
     }
 
     apply<JavaLibraryPlugin>()
@@ -125,6 +144,15 @@ subprojects {
             maven {
                 url = uri("$buildDir/repo")
             }
+            if (System.getenv("REPO_URL") != null) {
+                maven {
+                    url = uri(System.getenv("REPO_URL"))
+                    credentials {
+                        username = System.getenv("REPO_USERNAME")
+                        password = System.getenv("REPO_PASSWORD")
+                    }
+                }
+            }
         }
         publications {
             register("mavenJava", MavenPublication::class) {
@@ -137,6 +165,8 @@ subprojects {
         java {
             sourceCompatibility = JavaVersion.VERSION_11
             targetCompatibility = JavaVersion.VERSION_11
+
+            withSourcesJar()
         }
 
         withType<JavaCompile> {

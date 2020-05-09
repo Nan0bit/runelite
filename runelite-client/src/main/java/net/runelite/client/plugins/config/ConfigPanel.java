@@ -91,7 +91,7 @@ import net.runelite.client.config.ModifierlessKeybind;
 import net.runelite.client.config.Range;
 import net.runelite.client.config.Units;
 import net.runelite.client.eventbus.EventBus;
-import net.runelite.client.events.ConfigButtonClicked;
+import net.runelite.api.events.ConfigButtonClicked;
 import net.runelite.client.events.ConfigChanged;
 import net.runelite.client.events.PluginChanged;
 import net.runelite.client.plugins.ExternalPluginManager;
@@ -589,7 +589,15 @@ class ConfigPanel extends PluginPanel
 
 			if (cid.getType() == int.class)
 			{
-				int value = Integer.parseInt(configManager.getConfiguration(cd.getGroup().value(), cid.getItem().keyName()));
+				int value;
+				try
+				{
+					value = Integer.parseInt(configManager.getConfiguration(cd.getGroup().value(), cid.getItem().keyName()));
+				}
+				catch (NumberFormatException ex)
+				{
+					return;
+				}
 
 				Units units = cid.getUnits();
 				Range range = cid.getRange();

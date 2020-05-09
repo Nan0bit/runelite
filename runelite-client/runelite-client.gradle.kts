@@ -39,7 +39,7 @@ description = "RuneLite Client"
 
 dependencies {
     annotationProcessor(group = "org.projectlombok", name = "lombok", version = "1.18.12")
-    annotationProcessor(group = "org.pf4j", name = "pf4j", version = "3.2.0")
+    annotationProcessor(group = "org.pf4j", name = "pf4j", version = "3.3.1")
 
     api(project(":runelite-api"))
 
@@ -49,43 +49,33 @@ dependencies {
 
     implementation(group = "ch.qos.logback", name = "logback-classic", version = "1.2.3")
     implementation(group = "com.google.code.gson", name = "gson", version = "2.8.6")
-    implementation(group = "com.google.guava", name = "guava", version = "28.2-jre")
+    implementation(group = "com.google.guava", name = "guava", version = "29.0-jre")
     implementation(group = "com.google.inject", name = "guice", version = "4.2.3", classifier = "no_aop")
     implementation(group = "com.h2database", name = "h2", version = "1.4.200")
-    implementation(group = "com.openosrs.rxrelay3", name = "rxrelay", version = "3.0.0-SNAPSHOT")
-    implementation(group = "com.squareup.okhttp3", name = "okhttp", version = "4.5.0")
-    implementation(group = "io.reactivex.rxjava3", name = "rxjava", version = "3.0.2")
+    implementation(group = "com.openosrs.rxrelay3", name = "rxrelay", version = "3.0.1-SNAPSHOT")
+    implementation(group = "com.squareup.okhttp3", name = "okhttp", version = "4.6.0")
+    implementation(group = "io.reactivex.rxjava3", name = "rxjava", version = "3.0.3")
     implementation(group = "net.java.dev.jna", name = "jna", version = "5.5.0")
-    implementation(group = "org.jgroups", name = "jgroups", version = "4.2.1.Final")
+    implementation(group = "org.jgroups", name = "jgroups", version = "4.2.3.Final")
     implementation(group = "net.java.dev.jna", name = "jna-platform", version = "5.5.0")
     implementation(group = "net.runelite", name = "discord", version = "1.1")
     implementation(group = "org.pushing-pixels", name = "radiance-substance", version = "2.5.1")
     implementation(group = "net.sf.jopt-simple", name = "jopt-simple", version = "5.0.4")
     implementation(group = "org.apache.commons", name = "commons-text", version = "1.8")
     implementation(group = "org.jetbrains", name = "annotations", version = "19.0.0")
-    implementation(group = "org.jogamp.gluegen", name = "gluegen-rt", version = "2.3.2")
-    implementation(group = "org.jogamp.jogl", name = "jogl-all", version = "2.3.2")
-    implementation(group = "org.jooq", name = "jooq", version = "3.13.1")
-    implementation(group = "org.jooq", name = "jooq-codegen", version = "3.13.1")
-    implementation(group = "org.jooq", name = "jooq-meta", version = "3.13.1")
+    implementation(group = "org.jooq", name = "jooq", version = "3.13.2")
+    implementation(group = "org.jooq", name = "jooq-codegen", version = "3.13.2")
+    implementation(group = "org.jooq", name = "jooq-meta", version = "3.13.2")
     implementation(group = "io.sentry", name = "sentry-logback", version = "1.7.30")
     implementation(group = "com.github.zafarkhaja", name = "java-semver", version = "0.9.0")
     implementation(group = "org.slf4j", name = "slf4j-api", version = "1.7.30")
-    implementation(group = "org.pf4j", name = "pf4j", version = "3.2.0") {
+    implementation(group = "org.pf4j", name = "pf4j", version = "3.3.1") {
         exclude(group = "org.slf4j")
     }
     implementation(group = "org.pf4j", name = "pf4j-update", version = "2.3.0")
     implementation(project(":http-api"))
 
     runtimeOnly(group = "org.pushing-pixels", name = "radiance-trident", version = "2.5.1")
-    runtimeOnly(group = "org.jogamp.gluegen", name = "gluegen-rt", version = "2.3.2", classifier = "natives-linux-amd64")
-    runtimeOnly(group = "org.jogamp.gluegen", name = "gluegen-rt", version = "2.3.2", classifier = "natives-linux-i586")
-    runtimeOnly(group = "org.jogamp.gluegen", name = "gluegen-rt", version = "2.3.2", classifier = "natives-windows-amd64")
-    runtimeOnly(group = "org.jogamp.gluegen", name = "gluegen-rt", version = "2.3.2", classifier = "natives-windows-i586")
-    runtimeOnly(group = "org.jogamp.jogl", name = "jogl-all", version = "2.3.2", classifier = "natives-linux-amd64")
-    runtimeOnly(group = "org.jogamp.jogl", name = "jogl-all", version = "2.3.2", classifier = "natives-linux-i586")
-    runtimeOnly(group = "org.jogamp.jogl", name = "jogl-all", version = "2.3.2", classifier = "natives-windows-amd64")
-    runtimeOnly(group = "org.jogamp.jogl", name = "jogl-all", version = "2.3.2", classifier = "natives-windows-i586")
     runtimeOnly(project(":injected-client"))
     runtimeOnly(project(":runescape-api"))
 
@@ -99,7 +89,7 @@ dependencies {
     testImplementation(group = "junit", name = "junit", version = "4.13")
     testImplementation(group = "org.mockito", name = "mockito-core", version = "3.3.3")
     testImplementation(group = "org.mockito", name = "mockito-inline", version = "3.3.3")
-    testImplementation(group = "com.squareup.okhttp3", name = "mockwebserver", version = "4.5.0")
+    testImplementation(group = "com.squareup.okhttp3", name = "mockwebserver", version = "4.6.0")
     testImplementation(group = "org.slf4j", name = "slf4j-api", version = "1.7.30")
 }
 

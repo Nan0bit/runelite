@@ -64,6 +64,7 @@ import net.runelite.client.Notifier;
 import net.runelite.client.RuneLite;
 import net.runelite.client.chat.ChatMessageManager;
 import net.runelite.client.eventbus.EventBus;
+import net.runelite.client.events.DrawFinished;
 import net.runelite.client.input.KeyManager;
 import net.runelite.client.input.MouseManager;
 import net.runelite.client.task.Scheduler;
@@ -94,6 +95,7 @@ public class Hooks implements Callbacks
 
 	private static final GameTick GAME_TICK = GameTick.INSTANCE;
 	private static final BeforeRender BEFORE_RENDER = BeforeRender.INSTANCE;
+	private static final DrawFinished drawFinishedEvent = new DrawFinished();
 
 	@Inject
 	private EventBus eventBus;
@@ -391,6 +393,18 @@ public class Hooks implements Callbacks
 		else
 		{
 			finalImage = image;
+		}
+
+		drawFinishedEvent.image = finalImage;
+		eventBus.post(DrawFinished.class, drawFinishedEvent);
+
+		try
+		{
+			renderer.render((Graphics2D)finalImage.getGraphics(), OverlayLayer.AFTER_MIRROR);
+		}
+		catch (Exception ex)
+		{
+			log.warn("Error during post-mirror rendering", ex);
 		}
 
 		// Draw the image onto the game canvas

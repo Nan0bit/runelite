@@ -324,6 +324,7 @@ public class WidgetID
 		static final int DEPOSIT_EQUIPMENT = 42;
 		static final int INCINERATOR = 44;
 		static final int INCINERATOR_CONFIRM = 45;
+		static final int EQUIPMENT_CONTENT_CONTAINER = 66;
 		static final int EQUIPMENT_BUTTON = 107;
 	}
 
@@ -587,6 +588,8 @@ public class WidgetID
 		static final int MESSAGES = 55;
 		static final int TRANSPARENT_BACKGROUND_LINES = 56;
 		static final int INPUT = 57;
+		static final int MESSAGE_LINES = 58;
+		static final int FIRST_MESSAGE = 59;
 	}
 
 	static class Prayer
