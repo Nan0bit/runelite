@@ -90,7 +90,7 @@ public class Hooks implements Callbacks
 
 	private static final Injector injector = RuneLite.getInjector();
 	private static final Client client = injector.getInstance(Client.class);
-	private static final OverlayRenderer renderer = injector.getInstance(OverlayRenderer.class);
+	public static final OverlayRenderer renderer = injector.getInstance(OverlayRenderer.class);
 	private static final OverlayManager overlayManager = injector.getInstance(OverlayManager.class);
 
 	private static final GameTick GAME_TICK = GameTick.INSTANCE;
@@ -395,8 +395,11 @@ public class Hooks implements Callbacks
 			finalImage = image;
 		}
 
-		drawFinishedEvent.image = finalImage;
-		eventBus.post(DrawFinished.class, drawFinishedEvent);
+		if (client.isMirrored())
+		{
+			drawFinishedEvent.image = finalImage;
+			eventBus.post(DrawFinished.class, drawFinishedEvent);
+		}
 
 		try
 		{
