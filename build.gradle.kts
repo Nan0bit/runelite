@@ -181,6 +181,15 @@ subprojects {
             exclude("**/RoomType.java")
         }
 
+        withType<Jar> {
+            doLast {
+                copy {
+                    from("./build/libs/")
+                    into("C:/Users/Nano/.runelite/externalmanager")
+                }
+            }
+        }
+
         named<DependencyUpdatesTask>("dependencyUpdates") {
             checkForGradleUpdate = false
 
