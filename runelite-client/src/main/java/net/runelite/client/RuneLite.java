@@ -74,7 +74,7 @@ import net.runelite.client.config.OpenOSRSConfig;
 import net.runelite.client.discord.DiscordService;
 import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.events.ExternalPluginsLoaded;
-import net.runelite.client.game.ClanManager;
+import net.runelite.client.game.FriendChatManager;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.game.LootManager;
 import net.runelite.client.game.PlayerManager;
@@ -167,7 +167,7 @@ public class RuneLite
 	private Provider<OverlayRenderer> overlayRenderer;
 
 	@Inject
-	private Provider<ClanManager> clanManager;
+	private Provider<FriendChatManager> friendChatManager;
 
 	@Inject
 	private Provider<ChatMessageManager> chatMessageManager;
@@ -237,6 +237,7 @@ public class RuneLite
 		final OptionParser parser = new OptionParser();
 		parser.accepts("developer-mode", "Enable developer tools");
 		parser.accepts("debug", "Show extra debugging output");
+		parser.accepts("safe-mode", "Disables external plugins and the GPU plugin");
 		parser.accepts("no-splash", "Do not show the splash screen");
 		final ArgumentAcceptingOptionSpec<String> proxyInfo = parser
 			.accepts("proxy")
@@ -254,7 +255,7 @@ public class RuneLite
 			.withRequiredArg()
 			.ofType(ClientUpdateCheckMode.class)
 			.defaultsTo(ClientUpdateCheckMode.AUTO)
-			.withValuesConvertedBy(new EnumConverter<ClientUpdateCheckMode>(ClientUpdateCheckMode.class)
+			.withValuesConvertedBy(new EnumConverter<>(ClientUpdateCheckMode.class)
 			{
 				@Override
 				public ClientUpdateCheckMode convert(String v)
@@ -325,8 +326,9 @@ public class RuneLite
 			System.setProperty("cli.world", String.valueOf(world));
 		}
 
+		final File configFile = resolveLinks(options.valueOf(configfile));
 		Properties properties = new Properties();
-		try (FileInputStream in = new FileInputStream(RuneLite.RUNELITE_DIR + "\\runeliteplus.properties"))
+		try (FileInputStream in = new FileInputStream(configFile))
 		{
 			properties.load(new InputStreamReader(in, StandardCharsets.UTF_8));
 			try
@@ -392,11 +394,16 @@ public class RuneLite
 
 		PROFILES_DIR.mkdirs();
 
+		log.info("OpenOSRS {} Runelite {} (launcher version {}) starting up, args: {}",
+			RuneLiteProperties.getPlusVersion(), RuneLiteProperties.getVersion(), RuneLiteProperties.getLauncherVersion() == null ? "unknown" : RuneLiteProperties.getLauncherVersion(),
+			args.length == 0 ? "none" : String.join(" ", args));
+
 		final long start = System.currentTimeMillis();
 
 		injector = Guice.createInjector(new RuneLiteModule(
 			clientLoader,
-			options.valueOf(configfile)));
+			options.has("safe-mode"),
+			configFile));
 
 		injector.getInstance(RuneLite.class).start();
 		final long end = System.currentTimeMillis();
@@ -480,7 +487,7 @@ public class RuneLite
 			chatMessageManager.get().loadColors();
 
 			overlayRenderer.get();
-			clanManager.get();
+			friendChatManager.get();
 			itemManager.get();
 			menuManager.get();
 			chatMessageManager.get();
@@ -490,6 +497,7 @@ public class RuneLite
 			playerManager.get();
 			chatboxPanelManager.get();
 			partyService.get();
+			infoBoxOverlay.get();
 
 			eventBus.subscribe(GameStateChanged.class, this, hooks::onGameStateChanged);
 			eventBus.subscribe(ScriptCallbackEvent.class, this, hooks::onScriptCallbackEvent);
@@ -635,6 +643,18 @@ public class RuneLite
 		public String valuePattern()
 		{
 			return null;
+		}
+	}
+
+	private static File resolveLinks(File f)
+	{
+		try
+		{
+			return f.toPath().toRealPath().toFile();
+		}
+		catch (IOException e)
+		{
+			return f;
 		}
 	}
 }

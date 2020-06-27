@@ -28,7 +28,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 
 plugins {
-    id("com.github.johnrengelman.shadow") version "5.2.0"
+    id("com.github.johnrengelman.shadow") version "6.0.0"
     java
 }
 
@@ -58,7 +58,7 @@ dependencies {
     implementation(group = "net.java.dev.jna", name = "jna", version = "5.5.0")
     implementation(group = "org.jgroups", name = "jgroups", version = "4.2.4.Final")
     implementation(group = "net.java.dev.jna", name = "jna-platform", version = "5.5.0")
-    implementation(group = "net.runelite", name = "discord", version = "1.1")
+    implementation(group = "net.runelite", name = "discord", version = "1.2")
     implementation(group = "org.pushing-pixels", name = "radiance-substance", version = "2.5.1")
     implementation(group = "net.sf.jopt-simple", name = "jopt-simple", version = "5.0.4")
     implementation(group = "org.apache.commons", name = "commons-text", version = "1.8")
@@ -124,15 +124,9 @@ tasks {
 
         inputs.properties(tokens)
 
-        from("src/main/resources") {
-            include("sentry.properties")
-        }
+        from("src/main/resources/")
+        include("**/*.properties")
         into("${buildDir}/resources/main")
-
-        from("src/main/resources/net/runelite/client") {
-            include("open.osrs.properties")
-        }
-        into("${buildDir}/resources/main/net/runelite/client")
 
         filter(ReplaceTokens::class, "tokens" to tokens)
         filteringCharset = "UTF-8"
@@ -148,6 +142,12 @@ tasks {
         archiveClassifier.set("shaded")
     }
 
+    processResources {
+        dependsOn(":runelite-script-assembler-plugin:indexMojo")
+
+        from("${buildDir}/scripts")
+    }
+
     withType<BootstrapTask> {
         group = "openosrs"
     }
@@ -156,6 +156,7 @@ tasks {
         group = "openosrs"
 
         classpath = project.sourceSets.main.get().runtimeClasspath
+        enableAssertions = true
         main = "net.runelite.client.RuneLite"
     }
 }

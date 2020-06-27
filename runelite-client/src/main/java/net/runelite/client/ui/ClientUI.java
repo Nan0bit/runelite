@@ -50,6 +50,8 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.time.Duration;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -113,6 +115,7 @@ public class ClientUI
 	private static final String CONFIG_CLIENT_MAXIMIZED = "clientMaximized";
 	private static final String CONFIG_OPACITY = "enableOpacity";
 	private static final String CONFIG_OPACITY_AMOUNT = "opacityPercentage";
+	private static final String CONFIG_CLIENT_SIDEBAR_CLOSED = "clientSidebarClosed";
 	private static final int CLIENT_WELL_HIDDEN_MARGIN = 160;
 	private static final int CLIENT_WELL_HIDDEN_MARGIN_TOP = 10;
 	public static final BufferedImage ICON = ImageUtil.getResourceStreamFromClass(ClientUI.class, "/openosrs.png");
@@ -134,6 +137,7 @@ public class ClientUI
 	private final MouseManager mouseManager;
 	private final Applet client;
 	private final ConfigManager configManager;
+	private final ExecutorService executorService;
 	private final Provider<ClientThread> clientThreadProvider;
 	private final EventBus eventBus;
 	private final CardLayout cardLayout = new CardLayout();
@@ -161,6 +165,7 @@ public class ClientUI
 		MouseManager mouseManager,
 		@Nullable Applet client,
 		ConfigManager configManager,
+		ExecutorService executorService,
 		Provider<ClientThread> clientThreadProvider,
 		EventBus eventbus)
 	{
@@ -169,6 +174,7 @@ public class ClientUI
 		this.mouseManager = mouseManager;
 		this.client = client;
 		this.configManager = configManager;
+		this.executorService = executorService;
 		this.clientThreadProvider = clientThreadProvider;
 		this.eventBus = eventbus;
 
@@ -497,7 +503,8 @@ public class ClientUI
 			sidebarNavigationButton = NavigationButton
 				.builder()
 				.priority(100)
-				.icon(sidebarClosedIcon)
+				.icon(sidebarOpenIcon)
+				.tooltip("Open SideBar")
 				.onClick(this::toggleSidebar)
 				.build();
 
@@ -507,7 +514,12 @@ public class ClientUI
 				null);
 
 			titleToolbar.addComponent(sidebarNavigationButton, sidebarNavigationJButton);
-			toggleSidebar();
+
+			// Open sidebar if the config closed state is unset
+			if (configManager.getConfiguration(CONFIG_GROUP, CONFIG_CLIENT_SIDEBAR_CLOSED) == null)
+			{
+				toggleSidebar();
+			}
 		});
 	}
 
@@ -532,7 +544,32 @@ public class ClientUI
 					if (clientBounds != null)
 					{
 						frame.setBounds(clientBounds);
-						frame.revalidateMinimumSize();
+
+						// frame.getGraphicsConfiguration().getBounds() returns the bounds for the primary display.
+						// We have to find the correct graphics configuration by using the intersection of the client boundaries.
+						GraphicsConfiguration gc = getIntersectingDisplay(clientBounds);
+						if (gc != null)
+						{
+							double scale = gc.getDefaultTransform().getScaleX();
+
+							// When Windows screen scaling is on, the position/bounds will be wrong when they are set.
+							// The bounds saved in shutdown are the full, non-scaled co-ordinates.
+							if (scale != 1)
+							{
+								clientBounds.setRect(
+									clientBounds.getX() / scale,
+									clientBounds.getY() / scale,
+									clientBounds.getWidth() / scale,
+									clientBounds.getHeight() / scale);
+
+								frame.setMinimumSize(clientBounds.getSize());
+								frame.setBounds(clientBounds);
+							}
+						}
+						else
+						{
+							frame.setLocationRelativeTo(frame.getOwner());
+						}
 					}
 					else
 					{
@@ -555,25 +592,13 @@ public class ClientUI
 				frame.setLocationRelativeTo(frame.getOwner());
 			}
 
-			// If the frame is well hidden (e.g. unplugged 2nd screen),
-			// we want to move it back to default position as it can be
-			// hard for the user to reposition it themselves otherwise.
-			Rectangle clientBounds = frame.getBounds();
-			Rectangle screenBounds = frame.getGraphicsConfiguration().getBounds();
-			if (clientBounds.x + clientBounds.width - CLIENT_WELL_HIDDEN_MARGIN < screenBounds.getX() ||
-				clientBounds.x + CLIENT_WELL_HIDDEN_MARGIN > screenBounds.getX() + screenBounds.getWidth() ||
-				clientBounds.y + CLIENT_WELL_HIDDEN_MARGIN_TOP < screenBounds.getY() ||
-				clientBounds.y + CLIENT_WELL_HIDDEN_MARGIN > screenBounds.getY() + screenBounds.getHeight())
-			{
-				frame.setLocationRelativeTo(frame.getOwner());
-			}
-
 			// Show frame
 			frame.setVisible(true);
 			frame.toFront();
 			requestFocus();
 			giveClientFocus();
 			log.info("Showing frame {}", frame);
+			frame.revalidateMinimumSize();
 		});
 
 		// Show out of date dialog if needed
@@ -584,6 +609,24 @@ public class ClientUI
 					+ "game update, it will work with reduced functionality until then.",
 				"OpenOSRS is outdated", INFORMATION_MESSAGE));
 		}
+	}
+
+	private GraphicsConfiguration getIntersectingDisplay(final Rectangle bounds)
+	{
+		GraphicsDevice[] gds = GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices();
+
+		for (GraphicsDevice gd : gds)
+		{
+			GraphicsConfiguration gc = gd.getDefaultConfiguration();
+
+			final Rectangle displayBounds = gc.getBounds();
+			if (displayBounds.intersects(bounds))
+			{
+				return gc;
+			}
+		}
+
+		return null;
 	}
 
 	private boolean showWarningOnExit()
@@ -606,9 +649,21 @@ public class ClientUI
 		saveClientBoundsConfig();
 		ClientShutdown csev = new ClientShutdown();
 		eventBus.post(ClientShutdown.class, csev);
+		executorService.shutdown();
+
 		new Thread(() ->
 		{
 			csev.waitForAllConsumers(Duration.ofSeconds(10));
+			try
+			{
+				if (!executorService.awaitTermination(5, TimeUnit.SECONDS))
+				{
+					executorService.shutdownNow();
+				}
+			}
+			catch (InterruptedException ignored)
+			{
+			}
 
 			if (client != null)
 			{
@@ -870,6 +925,7 @@ public class ClientUI
 		{
 			sidebarNavigationJButton.setIcon(new ImageIcon(sidebarOpenIcon));
 			sidebarNavigationJButton.setToolTipText("Open SideBar");
+			configManager.setConfiguration(CONFIG_GROUP, CONFIG_CLIENT_SIDEBAR_CLOSED, true);
 
 			contract();
 
@@ -880,6 +936,7 @@ public class ClientUI
 		{
 			sidebarNavigationJButton.setIcon(new ImageIcon(sidebarClosedIcon));
 			sidebarNavigationJButton.setToolTipText("Close SideBar");
+			configManager.unsetConfiguration(CONFIG_GROUP, CONFIG_CLIENT_SIDEBAR_CLOSED);
 
 			// Try to restore last panel
 			expand(currentNavButton);
@@ -1108,23 +1165,16 @@ public class ClientUI
 
 	private void saveClientBoundsConfig()
 	{
+		final Rectangle bounds = frame.getBounds();
 		if ((frame.getExtendedState() & JFrame.MAXIMIZED_BOTH) != 0)
 		{
+			configManager.setConfiguration(CONFIG_GROUP, CONFIG_CLIENT_BOUNDS, bounds);
 			configManager.setConfiguration(CONFIG_GROUP, CONFIG_CLIENT_MAXIMIZED, true);
 		}
 		else
 		{
-			final Rectangle bounds = frame.getBounds();
-
-			// Try to expand sidebar
-			if (!sidebarOpen)
-			{
-				bounds.width += pluginToolbar.getWidth();
-			}
-
 			if (config.automaticResizeType() == ExpandResizeType.KEEP_GAME_SIZE)
 			{
-
 				// Try to contract plugin panel
 				if (pluginPanel != null)
 				{

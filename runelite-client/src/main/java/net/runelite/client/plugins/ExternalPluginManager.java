@@ -28,7 +28,6 @@ import com.google.common.collect.Lists;
 import com.google.common.graph.GraphBuilder;
 import com.google.common.graph.Graphs;
 import com.google.common.graph.MutableGraph;
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.google.inject.Binder;
 import com.google.inject.CreationException;
 import com.google.inject.Injector;
@@ -48,7 +47,6 @@ import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
@@ -56,6 +54,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.inject.Singleton;
 import javax.swing.JOptionPane;
 import lombok.AccessLevel;
@@ -68,6 +67,7 @@ import net.runelite.client.RuneLiteProperties;
 import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.config.OpenOSRSConfig;
+import net.runelite.client.config.RuneLiteConfig;
 import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.events.ConfigChanged;
 import net.runelite.client.events.ExternalPluginChanged;
@@ -103,6 +103,7 @@ public class ExternalPluginManager
 	private final List<UpdateRepository> repositories = new ArrayList<>();
 	private final OpenOSRSConfig openOSRSConfig;
 	private final EventBus eventBus;
+	private final ExecutorService executorService;
 	private final ConfigManager configManager;
 	private final Map<String, String> pluginsMap = new HashMap<>();
 	@Getter(AccessLevel.PUBLIC)
@@ -113,18 +114,23 @@ public class ExternalPluginManager
 	@Getter(AccessLevel.PUBLIC)
 	private UpdateManager updateManager;
 	private final Set<PluginType> pluginTypes = Set.of(PluginType.values());
+	private final boolean safeMode;
 
 	@Inject
 	public ExternalPluginManager(
+		@Named("safeMode") final boolean safeMode,
 		PluginManager pluginManager,
 		OpenOSRSConfig openOSRSConfig,
 		EventBus eventBus,
+		ExecutorService executorService,
 		ConfigManager configManager,
 		Groups groups)
 	{
+		this.safeMode = safeMode;
 		this.runelitePluginManager = pluginManager;
 		this.openOSRSConfig = openOSRSConfig;
 		this.eventBus = eventBus;
+		this.executorService = executorService;
 		this.configManager = configManager;
 		this.groups = groups;
 
@@ -448,6 +454,14 @@ public class ExternalPluginManager
 				continue;
 			}
 
+			if (safeMode && !pluginDescriptor.loadInSafeMode())
+			{
+				log.debug("Disabling {} due to safe mode", clazz);
+				// also disable the plugin from autostarting later
+				configManager.unsetConfiguration(RuneLiteConfig.GROUP_NAME, clazz.getSimpleName().toLowerCase());
+				continue;
+			}
+
 			@SuppressWarnings("unchecked") Class<Plugin> pluginClass = (Class<Plugin>) clazz;
 			graph.addNode(pluginClass);
 		}
@@ -477,62 +491,50 @@ public class ExternalPluginManager
 
 		final long start = System.currentTimeMillis();
 
-		// some plugins get stuck on IO, so add some extra threads
-		ExecutorService exec = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() * 2,
-			new ThreadFactoryBuilder()
-				.setNameFormat("external-plugin-manager-%d")
-				.build());
-
-		try
+		List<Plugin> scannedPlugins = new CopyOnWriteArrayList<>();
+		sortedPlugins.forEach(group ->
 		{
-			List<Plugin> scannedPlugins = new CopyOnWriteArrayList<>();
-			sortedPlugins.forEach(group ->
-			{
-				List<Future<?>> curGroup = new ArrayList<>();
-				group.forEach(pluginClazz ->
-					curGroup.add(exec.submit(() ->
+			List<Future<?>> curGroup = new ArrayList<>();
+			group.forEach(pluginClazz ->
+				curGroup.add(executorService.submit(() ->
+				{
+					Plugin plugininst;
+					try
 					{
-						Plugin plugininst;
-						try
+						//noinspection unchecked
+						plugininst = instantiate(scannedPlugins, (Class<Plugin>) pluginClazz, init, initConfig);
+
+						if (plugininst == null)
 						{
-							//noinspection unchecked
-							plugininst = instantiate(scannedPlugins, (Class<Plugin>) pluginClazz, init, initConfig);
-							scannedPlugins.add(plugininst);
-						}
-						catch (PluginInstantiationException e)
-						{
-							log.warn("Error instantiating plugin!", e);
 							return;
 						}
 
-						loaded.getAndIncrement();
-
-						RuneLiteSplashScreen.stage(.67, .75, "Loading external plugins", loaded.get(), scannedPlugins.size());
-					})));
-				curGroup.forEach(future ->
-				{
-					try
-					{
-						future.get();
+						scannedPlugins.add(plugininst);
 					}
-					catch (InterruptedException | ExecutionException e)
+					catch (PluginInstantiationException e)
 					{
-						log.warn("Could not instantiate external plugin", e);
+						log.warn("Error instantiating plugin!", e);
+						return;
 					}
-				});
-			});
 
-			log.info("External plugin instantiation took {}ms", System.currentTimeMillis() - start);
-		}
-		finally
-		{
-			List<Runnable> unfinishedTasks = exec.shutdownNow();
-			if (!unfinishedTasks.isEmpty())
+					loaded.getAndIncrement();
+
+					RuneLiteSplashScreen.stage(.67, .75, "Loading external plugins", loaded.get(), scannedPlugins.size());
+				})));
+			curGroup.forEach(future ->
 			{
-				// This shouldn't happen since we Future#get all tasks submitted to the executor
-				log.warn("Did not complete all update tasks: {}", unfinishedTasks);
-			}
-		}
+				try
+				{
+					future.get();
+				}
+				catch (InterruptedException | ExecutionException e)
+				{
+					log.warn("Could not instantiate external plugin", e);
+				}
+			});
+		});
+
+		log.info("External plugin instantiation took {}ms", System.currentTimeMillis() - start);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -658,6 +660,11 @@ public class ExternalPluginManager
 		{
 			throw new PluginInstantiationException(ex);
 		}
+		catch (NoClassDefFoundError ex)
+		{
+			log.error("Plugin {} is outdated", clazz.getSimpleName());
+			return null;
+		}
 
 		log.debug("Loaded plugin {}", clazz.getSimpleName());
 		return plugin;
@@ -716,39 +723,46 @@ public class ExternalPluginManager
 	private List<Plugin> loadPlugin(String pluginId)
 	{
 		List<Plugin> scannedPlugins = new ArrayList<>();
-		List<Plugin> extensions = externalPluginManager.getExtensions(Plugin.class, pluginId);
-		for (Plugin plugin : extensions)
+		try
 		{
-			pluginClassLoaders.add(plugin.getClass().getClassLoader());
+			List<Plugin> extensions = externalPluginManager.getExtensions(Plugin.class, pluginId);
+			for (Plugin plugin : extensions)
+			{
+				pluginClassLoaders.add(plugin.getClass().getClassLoader());
 
-			pluginsMap.remove(plugin.getClass().getSimpleName());
-			pluginsMap.put(plugin.getClass().getSimpleName(), pluginId);
+				pluginsMap.remove(plugin.getClass().getSimpleName());
+				pluginsMap.put(plugin.getClass().getSimpleName(), pluginId);
 
-			pluginsInfoMap.remove(plugin.getClass().getSimpleName());
+				pluginsInfoMap.remove(plugin.getClass().getSimpleName());
 
-			AtomicReference<String> support = new AtomicReference<>("");
+				AtomicReference<String> support = new AtomicReference<>("");
 
-			updateManager.getRepositories().forEach(repository ->
-				repository.getPlugins().forEach((key, value) ->
-				{
-					if (key.equals(pluginId))
+				updateManager.getRepositories().forEach(repository ->
+					repository.getPlugins().forEach((key, value) ->
 					{
-						support.set(value.projectUrl);
-					}
-				}));
+						if (key.equals(pluginId))
+						{
+							support.set(value.projectUrl);
+						}
+					}));
 
-			pluginsInfoMap.put(
-				plugin.getClass().getSimpleName(),
-				new HashMap<>()
-				{{
-					put("version", externalPluginManager.getPlugin(pluginId).getDescriptor().getVersion());
-					put("id", externalPluginManager.getPlugin(pluginId).getDescriptor().getPluginId());
-					put("provider", externalPluginManager.getPlugin(pluginId).getDescriptor().getProvider());
-					put("support", support.get());
-				}}
-			);
+				pluginsInfoMap.put(
+					plugin.getClass().getSimpleName(),
+					new HashMap<>()
+					{{
+						put("version", externalPluginManager.getPlugin(pluginId).getDescriptor().getVersion());
+						put("id", externalPluginManager.getPlugin(pluginId).getDescriptor().getPluginId());
+						put("provider", externalPluginManager.getPlugin(pluginId).getDescriptor().getProvider());
+						put("support", support.get());
+					}}
+				);
 
-			scannedPlugins.add(plugin);
+				scannedPlugins.add(plugin);
+			}
+		}
+		catch (NoClassDefFoundError ex)
+		{
+			log.error("plugin {} is outdated", pluginId);
 		}
 
 		return scannedPlugins;
