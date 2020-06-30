@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018, Adam <Adam@sigterm.info>
+ * Copyright (c) 2020, Adam <Adam@sigterm.info>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -22,24 +22,22 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package net.runelite.api.events;
+package net.runelite.api;
 
-import lombok.Value;
-import net.runelite.api.GameObject;
-import net.runelite.api.Tile;
-
-/**
- * An event where a {@link GameObject} is added to a {@link Tile}.
- */
-@Value
-public class GameObjectSpawned implements Event
+public interface VarbitDefinition
 {
 	/**
-	 * The affected tile.
+	 * The varp index for this varbit
 	 */
-	Tile tile;
+	int getIndex();
+
 	/**
-	 * The newly spawned game object.
+	 * The least significant bit of the varbit
 	 */
-	GameObject gameObject;
+	int getLeastSignificantBit();
+
+	/**
+	 * The most significant bit of the varbit (inclusive)
+	 */
+	int getMostSignificantBit();
 }

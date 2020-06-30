@@ -234,6 +234,9 @@ public interface RSClient extends RSGameShell, Client
 	@Import("combatTargetPlayerIndex")
 	int getLocalInteractingIndex();
 
+	@Import("combatTargetPlayerIndex")
+	void setLocalInteractingIndex(int idx);
+
 	@Import("groundItems")
 	RSNodeDeque[][][] getGroundItemDeque();
 
@@ -453,6 +456,10 @@ public interface RSClient extends RSGameShell, Client
 
 	@Import("SpriteBuffer_spritePalette")
 	void setIndexedSpritePalette(int[] indexedSpritePalette);
+
+	@Import("archive2")
+	@Override
+	RSArchive getConfigArchive();
 
 	@Import("archive6")
 	RSArchive getMusicTracks();
@@ -1269,4 +1276,10 @@ public interface RSClient extends RSGameShell, Client
 
 	@Import("rightTitleSprite")
 	void setRightTitleSprite(Sprite background);
+
+	@Construct
+	RSBuffer newBuffer(byte[] bytes);
+
+	@Construct
+	RSVarbitDefinition newVarbitDefinition();
 }

@@ -408,6 +408,16 @@ public interface Client extends GameShell
 	IndexDataBase getIndexScripts();
 
 	/**
+	 * Gets the config archive, containing Varplayer and Varbit definitions
+	 */
+	IndexDataBase getConfigArchive();
+
+	/**
+	 * Gets the config index.
+	 */
+	IndexDataBase getIndexConfig();
+
+	/**
 	 * Returns the x-axis base coordinate.
 	 * <p>
 	 * This value is the x-axis world coordinate of tile (0, 0) in
@@ -808,6 +818,12 @@ public interface Client extends GameShell
 	 * @see Varbits
 	 */
 	void setVarbitValue(int[] varps, int varbit, int value);
+
+	/**
+	 * Gets the varbit composition for a given varbit id
+	 */
+	@Nullable
+	VarbitDefinition getVarbitDefinition(int id);
 
 	/**
 	 * Gets the widget flags table.
@@ -2042,4 +2058,12 @@ public interface Client extends GameShell
 	 * Gets whether the flames on the login screen should be rendered
 	 */
 	boolean shouldRenderLoginScreenFire();
+
+	/**
+	 * Test if a key is pressed
+	 * @param keycode the keycode
+	 * @return
+	 * @see KeyCode
+	 */
+	boolean isKeyPressed(int keycode);
 }
