@@ -945,7 +945,7 @@ class ConfigPanel extends PluginPanel
 						box.setToolTipText(Text.titleCase((Enum) box.getSelectedItem()));
 					}
 				});
-				item.add(box, BorderLayout.EAST);
+				item.add(box, BorderLayout.CENTER);
 			}
 
 			if (cid.getType() == Keybind.class || cid.getType() == ModifierlessKeybind.class)
@@ -1081,15 +1081,7 @@ class ConfigPanel extends PluginPanel
 
 		if (!Strings.isNullOrEmpty(configItem.warning()))
 		{
-			final int result = JOptionPane.showOptionDialog(component, configItem.warning(),
-				"Are you sure?", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE,
-				null, new String[]{"Yes", "No"}, "No");
-
-			if (result != JOptionPane.YES_OPTION)
-			{
-				rebuild(false);
-				return;
-			}
+			JOptionPane.showMessageDialog(component, configItem.warning(), "Warning", JOptionPane.WARNING_MESSAGE);
 		}
 
 		if (component instanceof JCheckBox)

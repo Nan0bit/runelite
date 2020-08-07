@@ -1,6 +1,6 @@
 /*
  * Copyright (c) 2018 Abex
- * Copyright (c) 2020 ThatGamerBlue
+ * Copyright (c) 2020, ThatGamerBlue <thatgamerblue@gmail.com>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,6 +51,9 @@ public abstract class ScriptVMMixin implements RSClient
 	@Inject
 	private static RSScript currentScript;
 
+	@Inject
+	private static RSScriptEvent rootScriptEvent;
+
 	// This field is set by the ScriptVM raw injector
 	@Inject
 	private static int currentScriptPC;
@@ -59,6 +62,17 @@ public abstract class ScriptVMMixin implements RSClient
 	@Inject
 	static void setCurrentScript(RSScript script)
 	{
+		if (rootScriptEvent != null)
+		{
+			if (script != null)
+			{
+				ScriptPreFired event = new ScriptPreFired((int) script.getHash(), rootScriptEvent);
+				client.getCallbacks().post(ScriptPreFired.class, event);
+			}
+
+			rootScriptEvent = null;
+		}
+
 		currentScript = script;
 	}
 
@@ -124,13 +138,8 @@ public abstract class ScriptVMMixin implements RSClient
 	}
 
 	@Copy("runScript")
-	static void rs$runScript(RSScriptEvent event, int maxExecutionTime)
-	{
-		throw new RuntimeException();
-	}
-
 	@Replace("runScript")
-	static void rl$runScript(RSScriptEvent event, int maxExecutionTime)
+	static void copy$runScript(RSScriptEvent event, int maxExecutionTime)
 	{
 		Object[] arguments = event.getArguments();
 		assert arguments != null && arguments.length > 0;
@@ -145,13 +154,12 @@ public abstract class ScriptVMMixin implements RSClient
 				client.getLogger().error("Error in JavaScriptCallback", e);
 			}
 		}
-		else if (arguments[0] instanceof Integer)
+		else
 		{
 			try
 			{
-				final ScriptPreFired pre = new ScriptPreFired((int) arguments[0], event);
-				client.getCallbacks().post(ScriptPreFired.class, pre);
-				rs$runScript(event, maxExecutionTime);
+				rootScriptEvent = event;
+				copy$runScript(event, maxExecutionTime);
 			}
 			finally
 			{

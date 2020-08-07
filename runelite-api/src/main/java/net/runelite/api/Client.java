@@ -408,11 +408,6 @@ public interface Client extends GameShell
 	IndexDataBase getIndexScripts();
 
 	/**
-	 * Gets the config archive, containing Varplayer and Varbit definitions
-	 */
-	IndexDataBase getConfigArchive();
-
-	/**
 	 * Gets the config index.
 	 */
 	IndexDataBase getIndexConfig();
@@ -498,6 +493,7 @@ public interface Client extends GameShell
 	 * @param widget the widget info
 	 * @return the widget
 	 */
+	@Nullable
 	Widget getWidget(WidgetInfo widget);
 
 	/**
@@ -510,6 +506,7 @@ public interface Client extends GameShell
 	 * @param childId the child widget ID
 	 * @return the widget corresponding to the group and child pair
 	 */
+	@Nullable
 	Widget getWidget(int groupId, int childId);
 
 	/**
@@ -1886,6 +1883,10 @@ public interface Client extends GameShell
 
 	boolean isSpellSelected();
 
+	String getSelectedSpellActionName();
+
+	int getSelectedSpellFlags();
+
 	/**
 	 * Set whether or not player attack options will be hidden for friends
 	 */
@@ -1940,7 +1941,11 @@ public interface Client extends GameShell
 
 	void setSelectedItemID(int id);
 
+	int getSelectedItemWidget();
+
 	void setSelectedItemWidget(int widgetID);
+
+	int getSelectedItemSlot();
 
 	void setSelectedItemSlot(int idx);
 
@@ -2066,4 +2071,12 @@ public interface Client extends GameShell
 	 * @see KeyCode
 	 */
 	boolean isKeyPressed(int keycode);
+
+	int getFollowerIndex();
+
+	int isItemSelected();
+
+	String getSelectedItemName();
+
+	Widget getMessageContinueWidget();
 }

@@ -459,7 +459,7 @@ public interface RSClient extends RSGameShell, Client
 
 	@Import("archive2")
 	@Override
-	RSArchive getConfigArchive();
+	RSArchive getIndexConfig();
 
 	@Import("archive6")
 	RSArchive getMusicTracks();
@@ -472,7 +472,7 @@ public interface RSClient extends RSGameShell, Client
 	@Override
 	RSArchive getIndexScripts();
 
-	@Import("widgetClickMasks")
+	@Import("widgetFlags")
 	@Override
 	RSNodeHashTable getWidgetFlags();
 
@@ -1070,6 +1070,14 @@ public interface RSClient extends RSGameShell, Client
 	@Override
 	void setSelectedSpellName(String name);
 
+	@Override
+	@Import("selectedSpellActionName")
+	String getSelectedSpellActionName();
+
+	@Override
+	@Import("selectedSpellFlags")
+	int getSelectedSpellFlags();
+
 	@Import("isSpellSelected")
 	boolean isSpellSelected();
 
@@ -1145,7 +1153,15 @@ public interface RSClient extends RSGameShell, Client
 
 	@Import("selectedItemSlot")
 	@Override
+	int getSelectedItemSlot();
+
+	@Import("selectedItemSlot")
+	@Override
 	void setSelectedItemSlot(int index);
+
+	@Import("selectedItemWidget")
+	@Override
+	int getSelectedItemWidget();
 
 	@Import("selectedItemWidget")
 	@Override
@@ -1282,4 +1298,19 @@ public interface RSClient extends RSGameShell, Client
 
 	@Construct
 	RSVarbitDefinition newVarbitDefinition();
+
+	@Override
+	@Import("followerIndex")
+	int getFollowerIndex();
+
+	@Override
+	@Import("isItemSelected")
+	int isItemSelected();
+
+	@Override
+	@Import("selectedItemName")
+	String getSelectedItemName();
+
+	@Import("meslayerContinueWidget")
+	Widget getMessageContinueWidget();
 }
