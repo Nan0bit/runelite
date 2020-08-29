@@ -28,13 +28,14 @@ import org.ajoberstar.grgit.Grgit
 
 buildscript {
     repositories {
+        mavenLocal()
         gradlePluginPortal()
         maven(url = "https://repo.openosrs.com/repository/maven/")
         maven(url = "https://raw.githubusercontent.com/open-osrs/hosting/master")
     }
     dependencies {
         classpath("org.ajoberstar.grgit:grgit-core:4.0.2")
-        classpath("com.github.ben-manes:gradle-versions-plugin:0.28.0")
+        classpath("com.github.ben-manes:gradle-versions-plugin:0.29.0")
         classpath("com.openosrs:injector-plugin:1.1.5")
     }
 }
