@@ -173,6 +173,9 @@ public class WidgetID
 	public static final int GAUNTLET_MAP_GROUP_ID = 638;
 	public static final int HALLOWED_SEPULCHRE_TIMER_GROUP_ID = 668;
 	public static final int HEALTH_OVERLAY_BAR_GROUP_ID = 303;
+	public static final int CHAMBERS_OF_XERIC_STORAGE_UNIT_PRIVATE_GROUP_ID = 271;
+	public static final int CHAMBERS_OF_XERIC_STORAGE_UNIT_SHARED_GROUP_ID = 550;
+	public static final int CHAMBERS_OF_XERIC_STORAGE_UNIT_INVENTORY_GROUP_ID = 551;
 
 	static class WorldMap
 	{
@@ -225,7 +228,7 @@ public class WidgetID
 	static class LogoutPanel
 	{
 		static final int WORLD_SWITCHER_BUTTON = 3;
-		static final int LOGOUT_BUTTON = 6;
+		static final int LOGOUT_BUTTON = 8;
 	}
 
 	static class PestControlBoat
@@ -323,6 +326,8 @@ public class WidgetID
 		static final int TAB_CONTAINER = 10;
 		static final int ITEM_CONTAINER = 12;
 		static final int SCROLLBAR = 13;
+		static final int UNNOTED_BUTTON = 21;
+		static final int NOTED_BUTTON = 23;
 		static final int SEARCH_BUTTON_BACKGROUND = 39;
 		static final int DEPOSIT_INVENTORY = 41;
 		static final int DEPOSIT_EQUIPMENT = 43;
@@ -339,6 +344,14 @@ public class WidgetID
 		static final int WINDOW_BORDERS = 2;
 		static final int HISTORY_BUTTON = 3;
 		static final int BACK_BUTTON = 4;
+		static final int OFFER1 = 7;
+		static final int OFFER2 = 8;
+		static final int OFFER3 = 9;
+		static final int OFFER4 = 10;
+		static final int OFFER5 = 11;
+		static final int OFFER6 = 12;
+		static final int OFFER7 = 13;
+		static final int OFFER8 = 14;
 		static final int OFFER_CONTAINER = 24;
 		static final int OFFER_DESCRIPTION = 25;
 		static final int OFFER_PRICE = 26;
@@ -928,7 +941,9 @@ public class WidgetID
 
 	static class WorldSwitcher
 	{
+		static final int CONTAINER = 1;
 		static final int WORLD_LIST = 16;
+		static final int LOGOUT_BUTTON = 23;
 	}
 
 	static class FossilOxygen
