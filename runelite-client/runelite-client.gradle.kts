@@ -62,11 +62,12 @@ dependencies {
     implementation(group = "org.pushing-pixels", name = "radiance-substance", version = "2.5.1")
     implementation(group = "net.sf.jopt-simple", name = "jopt-simple", version = "5.0.4")
     implementation(group = "org.apache.commons", name = "commons-text", version = "1.9")
+    implementation(group = "commons-io", name = "commons-io", version = "2.8.0")
     implementation(group = "org.jetbrains", name = "annotations", version = "20.1.0")
-    implementation(group = "org.jooq", name = "jooq", version = "3.14.0")
-    implementation(group = "org.jooq", name = "jooq-codegen", version = "3.14.0")
-    implementation(group = "org.jooq", name = "jooq-meta", version = "3.14.0")
-    implementation(group = "io.sentry", name = "sentry-logback", version = "3.1.1")
+    implementation(group = "org.jooq", name = "jooq", version = "3.14.1")
+    implementation(group = "org.jooq", name = "jooq-codegen", version = "3.14.1")
+    implementation(group = "org.jooq", name = "jooq-meta", version = "3.14.1")
+    implementation(group = "io.sentry", name = "sentry-logback", version = "3.1.2")
     implementation(group = "com.github.zafarkhaja", name = "java-semver", version = "0.9.0")
     implementation(group = "org.slf4j", name = "slf4j-api", version = "1.7.30")
     implementation(group = "org.pf4j", name = "pf4j", version = "3.4.1") {
@@ -87,8 +88,8 @@ dependencies {
     testImplementation(group = "com.google.inject.extensions", name = "guice-testlib", version = "4.2.3")
     testImplementation(group = "org.hamcrest", name = "hamcrest-library", version = "2.2")
     testImplementation(group = "junit", name = "junit", version = "4.13.1")
-    testImplementation(group = "org.mockito", name = "mockito-core", version = "3.5.15")
-    testImplementation(group = "org.mockito", name = "mockito-inline", version = "3.5.15")
+    testImplementation(group = "org.mockito", name = "mockito-core", version = "3.6.0")
+    testImplementation(group = "org.mockito", name = "mockito-inline", version = "3.6.0")
     testImplementation(group = "com.squareup.okhttp3", name = "mockwebserver", version = "4.9.0")
     testImplementation(group = "org.slf4j", name = "slf4j-api", version = "1.7.30")
 }
@@ -157,6 +158,6 @@ tasks {
 
         classpath = sourceSets["main"].runtimeClasspath
         enableAssertions = true
-        main = "net.runelite.client.RuneLite"
+        mainClass.set("net.runelite.client.RuneLite")
     }
 }
